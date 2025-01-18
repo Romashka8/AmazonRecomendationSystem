@@ -26,7 +26,7 @@ class AmazonReviewsLoader:
             self.in_dir = in_dir
         else:
             raise ValueError(
-                f'Входная директория должна быть строкой следуещего вида: "{os.path.getcwd()}"!'
+                f'Входная директория должна быть строкой следуещего вида: "{os.getcwd()}"!'
             )
 
         with open(in_dir, 'r') as f:
@@ -120,7 +120,7 @@ class AmazonReviewsLoader:
             self.out_dir = out_dir
         else:
             raise ValueError(
-                f'Выходная директория должна быть строкой следуещего вида: "{os.path.getcwd()}"! Формат файла должен быть либо "csv", либо "xlsx"!'
+                f'Выходная директория должна быть строкой следуещего вида: "{os.getcwd()}"! Формат файла должен быть либо "csv", либо "xlsx"!'
             )
 
         # Формируем имя файла
