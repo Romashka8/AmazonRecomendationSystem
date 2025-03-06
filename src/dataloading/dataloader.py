@@ -1,14 +1,14 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 import pandas as pd
 import numpy as np
 
 import os
 import json
 import pickle
-import warnings
 from tqdm import tqdm
 from typing import Optional
-
-warnings.filterwarnings('ignore')
 
 
 class AmazonReviewsLoader:
@@ -56,55 +56,27 @@ class AmazonReviewsLoader:
         self.orig_indexes = np.random.randint(0, self._len, size=self.sample_size)
         self.sample = None
 
-    def get_sample(self, create_new: bool = False, reset_index: bool = False) -> pd.DataFrame:
+    def __repr__(self):
+        output = {
+                'dtype' : str(type(self)),
+                'in_dir' : self.in_dir,
+                'out_dir' : self.out_dir,
+                'sample_size' : self.sample_size,
+                'seed' : self.seed
+            }
+        return str(output)
+
+    def get_sample(self):
         """
-        Получает выборку данных.
-
-        :param create_new: Флаг для создания новой выборки (по умолчанию False).
-        :param reset_index: Флаг для сброса индекса DataFrame (по умолчанию False).
-        :return: DataFrame с выборкой данных.
+        Предполагается реализация в наследниках
         """
+        pass
 
-        if self.sample is None or create_new:
-            self.seed[1] = True
-            data = []
-            # Загрузка данных по случайным индексам
-            for index in tqdm(self.orig_indexes, desc="Загрузка данных"):
-                row = json.loads(self._data[index])
-                # Удаление поля 'images'
-                del row['images']
-                data.append(row)
-
-            # Преобразование данных в DataFrame
-            self.sample = pd.json_normalize(data).set_index(self.orig_indexes)
-
-        if reset_index:
-            # Сброс индекса DataFrame
-            self.sample = self.sample.reset_index()
-
-        return self.sample
-
-    def get_all(self) -> pd.DataFrame:
+    def get_all(self):
         """
-        Получает все данные.
-
-        :return: DataFrame со всеми данными.
+        Предполагается реализация в наследниках
         """
-
-        self.seed[1] = True
-        data = []
-        # Загрузка всех данных
-        for index in tqdm(range(self._len), desc="Загрузка данных"):
-            row = json.loads(self._data[index])
-            # Удаление поля 'images'
-            del row['images']
-            data.append(row)
-
-        # Преобразование данных в DataFrame
-        self.sample = pd.json_normalize(data)
-        self.sample_size = self._len
-
-        return self.sample
+        pass
 
     def save_sample(self, out_dir: str, f_format: str) -> None:
         """
@@ -158,4 +130,108 @@ class AmazonReviewsLoader:
             self.orig_indexes = np.random.randint(0, self._len, size=self.sample_size)
             print('Семя успешно изменено! Для создания новой выборки на его основе нужно заново вызвать метод с следующими параметрами: get_sample(create_new=True)')
         else:
-            raise ValueError('Семя случайной генерации должно лежать в диапазоне: "0 < seed <= 2 ** 32 - 1"!')            
+            raise ValueError('Семя случайной генерации должно лежать в диапазоне: "0 < seed <= 2 ** 32 - 1"!')
+
+
+class AllBeautyLoader(AmazonReviewsLoader):
+    def get_sample(self, create_new: bool = False, reset_index: bool = False) -> pd.DataFrame:
+        """
+        Получает выборку данных.
+
+        :param create_new: Флаг для создания новой выборки (по умолчанию False).
+        :param reset_index: Флаг для сброса индекса DataFrame (по умолчанию False).
+        :return: DataFrame с выборкой данных.
+        """
+
+        if self.sample is None or create_new:
+            self.seed[1] = True
+            data = []
+            # Загрузка данных по случайным индексам
+            for index in tqdm(self.orig_indexes, desc="Загрузка данных"):
+                row = json.loads(self._data[index])
+                # Удаление поля 'images'
+                del row['images']
+                data.append(row)
+
+            # Преобразование данных в DataFrame
+            self.sample = pd.json_normalize(data).set_index(self.orig_indexes)
+
+        if reset_index:
+            # Сброс индекса DataFrame
+            self.sample = self.sample.reset_index()
+
+        return self.sample
+
+    def get_all(self) -> pd.DataFrame:
+        """
+        Получает все данные.
+
+        :return: DataFrame со всеми данными.
+        """
+
+        self.seed[1] = True
+        data = []
+        # Загрузка всех данных
+        for index in tqdm(range(self._len), desc="Загрузка данных"):
+            row = json.loads(self._data[index])
+            # Удаление поля 'images'
+            del row['images']
+            data.append(row)
+
+        # Преобразование данных в DataFrame
+        self.sample = pd.json_normalize(data)
+        self.sample_size = self._len
+
+        return self.sample
+
+
+class AllBeautyLoaderMeta(AmazonReviewsLoader):
+    def get_sample(self, create_new: bool = False, reset_index: bool = False) -> pd.DataFrame:
+        """
+        Получает выборку данных.
+
+        :param create_new: Флаг для создания новой выборки (по умолчанию False).
+        :param reset_index: Флаг для сброса индекса DataFrame (по умолчанию False).
+        :return: DataFrame с выборкой данных.
+        """
+
+        if self.sample is None or create_new:
+            self.seed[1] = True
+            data = []
+            # Загрузка данных по случайным индексам
+            for index in tqdm(self.orig_indexes, desc="Загрузка данных"):
+                row = json.loads(self._data[index])
+                # Удаление поля 'images', 'videos'
+                del row['images'], row['videos']
+                data.append(row)
+
+            # Преобразование данных в DataFrame
+            self.sample = pd.json_normalize(data).set_index(self.orig_indexes)
+
+        if reset_index:
+            # Сброс индекса DataFrame
+            self.sample = self.sample.reset_index()
+
+        return self.sample
+
+    def get_all(self) -> pd.DataFrame:
+        """
+        Получает все данные.
+
+        :return: DataFrame со всеми данными.
+        """
+
+        self.seed[1] = True
+        data = []
+        # Загрузка всех данных
+        for index in tqdm(range(self._len), desc="Загрузка данных"):
+            row = json.loads(self._data[index])
+            # Удаление поля 'images', 'videos'
+            del row['images'], row['videos']
+            data.append(row)
+
+        # Преобразование данных в DataFrame
+        self.sample = pd.json_normalize(data)
+        self.sample_size = self._len
+
+        return self.sample
