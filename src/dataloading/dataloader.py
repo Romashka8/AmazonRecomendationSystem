@@ -227,7 +227,7 @@ class AllBeautyLoaderMeta(AmazonReviewsLoader):
         for index in tqdm(range(self._len), desc="Загрузка данных"):
             row = json.loads(self._data[index])
             # Удаление поля 'images', 'videos'
-            del row['images'], row['videos']
+            del row['images'], row['videos'], row['features'], row['description'], row['price'], row['bought_together'], row['details'], row['categories'], row['main_category']
             data.append(row)
 
         # Преобразование данных в DataFrame
